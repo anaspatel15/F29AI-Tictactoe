@@ -4,6 +4,7 @@ package ticTacToe;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A Value Iteration Agent, only very partially implemented. The methods to implement are: 
@@ -56,7 +57,6 @@ public class ValueIterationAgent extends Agent {
 	 */
 	public ValueIterationAgent(Policy p) {
 		super(p);
-		
 	}
 
 	public ValueIterationAgent(double discountFactor) {
@@ -74,13 +74,9 @@ public class ValueIterationAgent extends Agent {
 	 */
 	public void initValues()
 	{
-		
 		List<Game> allGames=Game.generateAllValidGames('X');//all valid games where it is X's turn, or it's terminal.
 		for(Game g: allGames)
 			this.valueFunction.put(g, 0.0);
-		
-		
-		
 	}
 	
 	
@@ -103,9 +99,22 @@ public class ValueIterationAgent extends Agent {
 	public void iterate()
 	{
 		/* YOUR CODE HERE
-		 */
+		*/
+		Set<Game> states = valueFunction.keySet();
+
+
+		for(int i = 0 ; i <= k ; i++)	{
+			for(Game g : states)	{
+				for(Move m : g.getPossibleMoves())	{
+					for(TransitionProb t : mdp.generateTransitions(g, m))	{
+						valueFunction.put(g, t.prob * (t.outcome.localReward + (discount * valueFunction.get(t.outcome.sPrime))));
+					}
+				}
+			}
+		}
 	}
 	
+
 	/**This method should be run AFTER the train method to extract a policy according to {@link ValueIterationAgent#valueFunction}
 	 * You will need to do a single step of expectimax from each game (state) key in {@link ValueIterationAgent#valueFunction} 
 	 * to extract a policy.
@@ -117,7 +126,21 @@ public class ValueIterationAgent extends Agent {
 		/*
 		 * YOUR CODE HERE
 		 */
-		return null;
+		Set<Game> states = valueFunction.keySet();
+		Policy p = new Policy();
+
+			for(Game g : states)	{
+				for(Move m : g.getPossibleMoves())	{
+					for(TransitionProb t : mdp.generateTransitions(g, m))	{
+						if(valueFunction.get(g) == (t.prob * (t.outcome.localReward + (discount * valueFunction.get(t.outcome.sPrime)))))	{
+							p.policy.put(g, m);
+						}
+						//(t.prob * (t.outcome.localReward + (discount * valueFunction.get(t.outcome.sPrime))))
+					}
+				}
+			}
+
+		return p;
 	}
 	
 	/**
