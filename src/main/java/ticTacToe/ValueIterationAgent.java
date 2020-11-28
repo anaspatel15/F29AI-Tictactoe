@@ -106,8 +106,15 @@ public class ValueIterationAgent extends Agent {
 		for(int i = 0 ; i <= k ; i++)	{
 			for(Game g : states)	{
 				for(Move m : g.getPossibleMoves())	{
-					for(TransitionProb t : mdp.generateTransitions(g, m))	{
-						valueFunction.put(g, t.prob * (t.outcome.localReward + (discount * valueFunction.get(t.outcome.sPrime))));
+					double max = 0;
+					List<TransitionProb> probs = mdp.generateTransitions(g, m);
+					for(int j = 0; j < probs.size(); j++)	{
+						if((probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * valueFunction.get(probs.get(j).outcome.sPrime)))) > max)	{
+							max = (probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * valueFunction.get(probs.get(j).outcome.sPrime))));
+							valueFunction.put(g, max);
+						}
+					//for(TransitionProb t : mdp.generateTransitions(g, m))	{
+						//valueFunction.put(g, t.prob * (t.outcome.localReward + (discount * valueFunction.get(t.outcome.sPrime))));
 					}
 				}
 			}
