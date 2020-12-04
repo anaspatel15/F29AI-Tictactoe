@@ -108,22 +108,31 @@ public class ValueIterationAgent extends Agent {
 					valueFunction.put(g, 0.0);
 					continue;
 				}
-				double max = 0;
-				//List<Double> stateValues = new ArrayList<Double>();
+				List<Double> stateValues = new ArrayList<Double>();
+				double max = 0.0;				
 				for(Move m : g.getPossibleMoves())	{
-					double sum = 0;
+					double sum = 0.0;
 					List<TransitionProb> probs = mdp.generateTransitions(g, m);
-					//stateValues.add(max);
 					for(int j = 0; j < probs.size(); j++)	{
 						sum = sum + (probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * valueFunction.get(probs.get(j).outcome.sPrime))));
-						if(sum > max)	{
-							max = sum;
-							valueFunction.put(g, max);
-						}
 					}
+					stateValues.add(sum);
+					max = Collections.max(stateValues);
 				}
+					stateValues.clear();
+					valueFunction.put(g, max);
 			}
 		}
+
+
+
+
+
+
+
+
+
+
 	}
 
 
@@ -175,24 +184,29 @@ public class ValueIterationAgent extends Agent {
 			}	*/
 
 
-			for(Game g : states)  	{
-				if(g.isTerminal())		{
-					continue;
+
+		
+		for(Game g : states)  	{
+			if(g.isTerminal())		{
+				continue;
 				}
-				double max = 0;
-				for(Move m : g.getPossibleMoves())	{
-					double sum = 0;
-					List<TransitionProb> probs = mdp.generateTransitions(g, m);
-					for(int j = 0; j < probs.size(); j++)	{
-						sum = sum + (probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * valueFunction.get(probs.get(j).outcome.sPrime))));
-						if(sum > max) {
-							max = sum;
-							p.policy.put(g, m);
-						}
+			List<Double> stateValues = new ArrayList<Double>();
+			double max = 0.0;
+			for(Move m : g.getPossibleMoves())	{
+				double sum = 0.0;
+				List<TransitionProb> probs = mdp.generateTransitions(g, m);
+				for(int j = 0; j < probs.size(); j++)	{
+					sum = sum + (probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * valueFunction.get(probs.get(j).outcome.sPrime))));
 					}
+				stateValues.add(sum);
+				max = Collections.max(stateValues);
+				
+				if(sum == max) {
+					p.policy.put(g, m);
 				}
 			}
-
+				stateValues.clear();
+		}
 		return p;
 	}
 
@@ -230,11 +244,5 @@ public class ValueIterationAgent extends Agent {
 		
 		Game g=new Game(agent, d, d);
 		g.playOut();
-		
-		
-		
-
-		
-		
 	}
 }
