@@ -117,10 +117,9 @@ public class ValueIterationAgent extends Agent {
 						sum = sum + (probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * valueFunction.get(probs.get(j).outcome.sPrime))));
 					}
 					stateValues.add(sum);
-					max = Collections.max(stateValues);
 				}
-					stateValues.clear();
-					valueFunction.put(g, max);
+				valueFunction.put(g, Collections.max(stateValues));					
+				stateValues.clear();
 			}
 		}
 
@@ -199,9 +198,8 @@ public class ValueIterationAgent extends Agent {
 					sum = sum + (probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * valueFunction.get(probs.get(j).outcome.sPrime))));
 					}
 				stateValues.add(sum);
-				max = Collections.max(stateValues);
 				
-				if(sum == max) {
+				if(sum == Collections.max(stateValues)) {
 					p.policy.put(g, m);
 				}
 			}
