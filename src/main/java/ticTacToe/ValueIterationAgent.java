@@ -1,10 +1,7 @@
 package ticTacToe;
 
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A Value Iteration Agent, only very partially implemented. The methods to implement are: 
@@ -87,6 +84,9 @@ public class ValueIterationAgent extends Agent {
 		mdp=new TTTMDP(winReward, loseReward, livingReward, drawReward);
 	}
 
+
+
+
 	/**
 
 
@@ -102,20 +102,24 @@ public class ValueIterationAgent extends Agent {
 		*/
 		Set<Game> states = valueFunction.keySet();
 
-
 		for(int i = 0 ; i <= k ; i++)	{
 			for(Game g : states)	{
+				if(g.isTerminal())	{
+					valueFunction.put(g, 0.0);
+					continue;
+				}
+				double max = 0;
+				//List<Double> stateValues = new ArrayList<Double>();
 				for(Move m : g.getPossibleMoves())	{
-					double max = 0;
+					double sum = 0;
 					List<TransitionProb> probs = mdp.generateTransitions(g, m);
-					valueFunction.put(g, max);
+					//stateValues.add(max);
 					for(int j = 0; j < probs.size(); j++)	{
-						if((probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * valueFunction.get(probs.get(j).outcome.sPrime)))) > max)	{
-							max = (probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * valueFunction.get(probs.get(j).outcome.sPrime))));
-							//valueFunction.put(g, max);
+						sum = sum + (probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * valueFunction.get(probs.get(j).outcome.sPrime))));
+						if(sum > max)	{
+							max = sum;
+							valueFunction.put(g, max);
 						}
-					//for(TransitionProb t : mdp.generateTransitions(g, m))	{
-						//valueFunction.put(g, t.prob * (t.outcome.localReward + (discount * valueFunction.get(t.outcome.sPrime))));
 					}
 				}
 			}
@@ -123,6 +127,8 @@ public class ValueIterationAgent extends Agent {
 	}
 
 
+	
+	
 	/**This method should be run AFTER the train method to extract a policy according to {@link ValueIterationAgent#valueFunction}
 	 * You will need to do a single step of expectimax from each game (state) key in {@link ValueIterationAgent#valueFunction}
 	 * to extract a policy.
@@ -149,18 +155,40 @@ public class ValueIterationAgent extends Agent {
 			}	*/
 
 
-			for(Game g : states)	{
+
+
+		/*	for(Game g : states)	{
+				double max = 0;
 				for(Move m : g.getPossibleMoves())	{
-					double max = 0;
 					List<TransitionProb> probs = mdp.generateTransitions(g, m);
-					p.policy.put(g, m);
+					//p.policy.put(g, m);
 					for(int j = 0; j < probs.size(); j++)	{
-						if((probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * valueFunction.get(probs.get(j).outcome.sPrime)))) > max)	{
+						if((probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * valueFunction.get(probs.get(j).outcome.sPrime)))) == valueFunction.get(g))	{
 							max = (probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * valueFunction.get(probs.get(j).outcome.sPrime))));
 							//valueFunction.put(g, max);
+							p.policy.put(g, m);
 						}
 						//for(TransitionProb t : mdp.generateTransitions(g, m))	{
 						//valueFunction.put(g, t.prob * (t.outcome.localReward + (discount * valueFunction.get(t.outcome.sPrime))));
+					}
+				}
+			}	*/
+
+
+			for(Game g : states)  	{
+				if(g.isTerminal())		{
+					continue;
+				}
+				double max = 0;
+				for(Move m : g.getPossibleMoves())	{
+					double sum = 0;
+					List<TransitionProb> probs = mdp.generateTransitions(g, m);
+					for(int j = 0; j < probs.size(); j++)	{
+						sum = sum + (probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * valueFunction.get(probs.get(j).outcome.sPrime))));
+						if(sum > max) {
+							max = sum;
+							p.policy.put(g, m);
+						}
 					}
 				}
 			}
@@ -192,9 +220,6 @@ public class ValueIterationAgent extends Agent {
 			System.out.println("Unimplemented methods! First implement the iterate() & extractPolicy() methods");
 			//System.exit(1);
 		}
-		
-		
-		
 	}
 
 	public static void main(String a[]) throws IllegalMoveException

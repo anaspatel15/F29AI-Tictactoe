@@ -800,9 +800,9 @@ public class Game {
 
 		if (x == null && o == null) {
 			x = new ValueIterationAgent();
-			o = new RandomAgent();
+			o = new HumanAgent();
 			System.out.println("X is vi agent.");
-			System.out.println("O is random agent.");
+			System.out.println("O is human agent.");
 		} else if (x == null) {
 			System.out.println("X is random agent");
 			x = new RandomAgent();
