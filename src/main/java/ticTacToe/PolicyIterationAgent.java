@@ -1,10 +1,8 @@
 package ticTacToe;
 
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+
 /**
  * A policy iteration agent. You should implement the following methods:
  * (1) {@link PolicyIterationAgent#evaluatePolicy}: this is the policy evaluation step from your lectures
@@ -114,8 +112,32 @@ public class PolicyIterationAgent extends Agent {
 		/*
 		 * YOUR CODE HERE
 		 */
+		Random ran = new Random();
+		for(Game g : policyValues.keySet())	{
+			if(!(g.getPossibleMoves().isEmpty()))	{
+				List<IndexPair> ipList = new ArrayList<>();
+				for(int a = 0; a <= 2; a++)	{
+					for(int b = 0; b <= 2; b++)	{
+						if(g.getBoard()[a][b] == ' ')	{
+							ipList.add(new IndexPair(a, b));
+						}
+					}
+
+					if(!(ipList.isEmpty()))	{
+						IndexPair ip = ipList.get(ran.nextInt(ipList.size()));
+						Move rm = new Move(g.whoseTurn, ip.x, ip.y);
+
+						while (!(g.isLegal(rm)))	{
+							ip = ipList.get(ran.nextInt(ipList.size()));
+							rm = new Move(g.whoseTurn, ip.x, ip.y);
+						}
+						curPolicy.put(g, rm);
+					}
+				}
+			}
+		}
 	}
-	
+
 	
 	/**
 	 * Performs policy evaluation steps until the maximum change in values is less than {@code delta}, in other words
@@ -128,8 +150,34 @@ public class PolicyIterationAgent extends Agent {
 	protected void evaluatePolicy(double delta)
 	{
 		/* YOUR CODE HERE */
-		
-		
+
+		Set<Game> states = curPolicy.keySet();
+		double maxDelta = 0.0;
+		do {
+			maxDelta = 0.0;
+			for (Game g : states) {
+				double current = policyValues.get(g);
+				if (g.isTerminal()) {
+					policyValues.put(g, 0.0);
+					continue;
+				}
+				for (Move m : g.getPossibleMoves()) {
+					double sum = 0.0;
+					List<TransitionProb> probs = mdp.generateTransitions(g, curPolicy.get(g));
+					for (int j = 0; j < probs.size(); j++) {
+						sum = sum + (probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * policyValues.get(probs.get(j).outcome.sPrime))));
+					}
+					double diff = Math.abs(current - sum);
+					policyValues.replace(g, sum);
+
+					if(diff > maxDelta)	{
+						maxDelta = diff;
+					}
+
+				}
+			}
+
+		}	while(maxDelta >= delta);
 	}
 		
 	
@@ -143,8 +191,40 @@ public class PolicyIterationAgent extends Agent {
 	protected boolean improvePolicy()
 	{
 		/* YOUR CODE HERE */
-		
-		return false;
+		Set<Game> states = curPolicy.keySet();
+		boolean improved = false;
+
+
+		for(Game g : states)  	{
+			if(g.isTerminal())		{
+				continue;
+			}
+			List<Double> stateValues = new ArrayList<Double>();
+			double max = 0.0;
+
+			Move currMove = curPolicy.get(g);
+			Move optMove = null;
+
+			for(Move m : g.getPossibleMoves())	{
+				double sum = 0.0;
+				List<TransitionProb> probs = mdp.generateTransitions(g, m);
+				for(int j = 0; j < probs.size(); j++)	{
+					sum = sum + (probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * policyValues.get(probs.get(j).outcome.sPrime))));
+				}
+				stateValues.add(sum);
+
+				if(sum == Collections.max(stateValues)) {
+					optMove = m;
+				}
+			}
+
+			if(!(optMove.equals(currMove)))	{
+				curPolicy.put(g, optMove);
+				improved = true;
+			}
+		}
+
+		return improved;
 	}
 	
 	/**
@@ -160,9 +240,11 @@ public class PolicyIterationAgent extends Agent {
 	public void train()
 	{
 		/* YOUR CODE HERE */
+		do {
+			this.evaluatePolicy(delta);
+		}	while (this.improvePolicy());
 		
-		
-		
+		super.policy = new Policy(curPolicy);
 	}
 	
 	public static void main(String[] args) throws IllegalMoveException
