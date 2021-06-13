@@ -151,39 +151,6 @@ public class ValueIterationAgent extends Agent {
 		Set<Game> states = valueFunction.keySet();
 		Policy p = new Policy();
 
-	/*		for(Game g : states)	{
-				for(Move m : g.getPossibleMoves())	{
-					for(TransitionProb t : mdp.generateTransitions(g, m))	{
-						if(valueFunction.get(g) == (t.prob * (t.outcome.localReward + (discount * valueFunction.get(t.outcome.sPrime)))))	{
-							p.policy.put(g, m);
-						}
-						//(t.prob * (t.outcome.localReward + (discount * valueFunction.get(t.outcome.sPrime))))
-					}
-				}
-			}	*/
-
-
-
-
-		/*	for(Game g : states)	{
-				double max = 0;
-				for(Move m : g.getPossibleMoves())	{
-					List<TransitionProb> probs = mdp.generateTransitions(g, m);
-					//p.policy.put(g, m);
-					for(int j = 0; j < probs.size(); j++)	{
-						if((probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * valueFunction.get(probs.get(j).outcome.sPrime)))) == valueFunction.get(g))	{
-							max = (probs.get(j).prob * (probs.get(j).outcome.localReward + (discount * valueFunction.get(probs.get(j).outcome.sPrime))));
-							//valueFunction.put(g, max);
-							p.policy.put(g, m);
-						}
-						//for(TransitionProb t : mdp.generateTransitions(g, m))	{
-						//valueFunction.put(g, t.prob * (t.outcome.localReward + (discount * valueFunction.get(t.outcome.sPrime))));
-					}
-				}
-			}	*/
-
-
-
 		
 		for(Game g : states)  	{
 			if(g.isTerminal())		{
